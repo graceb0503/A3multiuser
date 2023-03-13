@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Hello, WebVR! - Multi User A-Frame</title>
+    <meta name="description" content="Hello, WebVR! - Multi User A-Frame">
+    <style>
+        .buttondef {
+            height: 300px;
+            width: 300px;
+            border-radius: 50%;
+            border: 2px solid red;
+            color: white;
+            position: absolute;
+            background-color: rgb(255, 255, 0);
+        }
+
+        .buttonplay {
+            height: 100px;
+            width: 300px;
+            border: 2px solid blue;
+            color: white;
+            position: absolute;
+            font: 200px;
+        }
+
+        .buttonred {
+            height: 300px;
+            width: 300px;
+            border-radius: 50%;
+            border: 2px solid red;
+            color: white;
+            position: absolute;
+            background-color: rgb(255, 0, 0);
+        }
+
+        img {
+            border-radius: 50%;
+        }
+
+        .p3 {
+  font-family: "Lucida Console", "Courier New", monospace;
+            z-index: 1;
+            top: 202px;
+            position: absolute; 
+            height: 132px; 
+            width: 494px;
+}
+    </style>
+</head>
+<body>
+    <label class="p3" id="label1" stype="left: -3px;"></label>
+    <label class="p3" id="demo" style="left: 100px;"></label>
+    <button id="playtogather" class="buttonplay"
+        style="bottom:400px; right: 2800px; background-color: rgb(255, 0, 255);">Play Togather</button>
+    <button id="playagainst" class="buttonplay"
+        style="bottom:400px; right: 2400px; background-color: rgb(0, 255, 255);">Play Against</button>
+    <button id="b1" class="buttondef" style="bottom:1000px; right: 1000px;"></button>
+    <button id="b2" class="buttondef" style="bottom:1400px; right: 1400px;"></button>
+    <button id="b3" class="buttondef" style="bottom:1000px; right: 1800px;"></button>
+    <button id="b4" class="buttondef" style="bottom:1000px; right: 2200px;"></button>
+    <button id="b5" class="buttondef" style="bottom:1400px; right: 2600px;"></button>
+    <button id="b6" class="buttondef" style="bottom:1000px; right: 3000px;"></button>
+    <button id="b7" class="buttondef" style="bottom:1000px; right: 3400px;"></button>
+    <button id="b8" class="buttondef" style="bottom:1500px; right: 1100px;"></button>
+    <button id="b9" class="buttondef" style="bottom:1700px; right: 2000px;"></button>
+    <button id="b10" class="buttondef" style="bottom:800px; right: 2800px;"></button>
+    <button id="b11" class="buttondef" style="bottom:2000px; right: 1000px;"></button>
+    <button id="b12" class="buttondef" style="bottom:3000px; right: 2000px;"></button>
+    <button id="b13" class="buttondef" style="bottom:2000px; right: 800px;"></button>
+    <button id="b14" class="buttondef" style="bottom:2500px; right: 3000px;"></button>
+    <button id="b15" class="buttondef" style="bottom:3000px; right: 3500px;"></button>
+    <button id="b16" class="buttondef" style="bottom:3200px; right: 1000px;"></button>
+    <button id="b17" class="buttondef" style="bottom:3500px; right: 2400px;"></button>
+    <button id="b18" class="buttondef" style="bottom:3700px; right: 1700px;"></button>
+    <button id="b19" class="buttondef" style="bottom:3000px; right: 3000px;"></button>
+    <button id="b20" class="buttondef" style="bottom:200px; right: 2000px;"></button>
+
+    <div id="imgs">
+        <!--<img id="water" src="/asset/water.jpg" style="width:500px; position: fixed; bottom: 1000px; right: 2000px;">
+        <img id="stone" src="/asset/stone.jpg" style="width:500px; position: fixed; bottom: 1000px; right: 5000px;">-->
+    </div>
+
+    <!-- 2 javascript files; server side, (first one)client side -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket = io();
+        let player = 2;
+        let xoffset = 0.20;
+        let yoffset = -0.5;
+        let zoffset = -2.0;
+        let offset = 0;
+
+        socket.on('connect', (userData) => {
+            console.log("I exist!");
+
+            document.querySelector("#playtogather").addEventListener("click", function () {
+                player = 1;
+                socket.emit('playGame', { player: 1, togather: true })
+            });
+
+            document.querySelector("#playagainst").addEventListener("click", function () {
+                player = 1;
+                socket.emit('playGame', { player: 1, togather: false })
+            });
+            socket.on('changeColorTogather', (data) => {
+                let ids = "b" + (data)
+                var btn = document.getElementById(ids);
+                btn.style.background = "rgb(255, 0, 0)";
+                btn.disabled = true
+            });
+
+            socket.on('collectBallComp', (data) => {
+                console.log(data.btn, data.btmpos, data.rightpos);
+                let ids = "b" + (data.btn)
+                var btn = document.getElementById(ids);
+                //let styleStr = "background-color:rgb(255, 0, 0);"
+                if (data.colr == "color:rgb(0, 255, 255)")
+                {
+                    btn.style.background = "rgb(0, 255, 255)";
+                }
+                else{
+                    btn.style.background = "rgb(255, 0, 255)";
+                }
+                btn.style.bottom = data.bottom;
+                if (data.right == "10px")
+                { 
+                    btn.style.right = data.right;
+                }
+                else
+                {
+                    btn.style.left = "10px";
+                }
+                btn.disabled = true
+                console.log(btn)
+            });
+
+            socket.on('playGameAll', (data) => {
+                var btn = document.getElementById("playagainst");
+                var btn2 = document.getElementById("playtogather");
+                btn.disabled = true;
+                btn2.disabled = true
+                if (data.togather) {
+                    for (let i = 0; i < 20; i++) {
+                        let ids = "#b" + (i + 1);
+                        document.querySelector(ids).addEventListener("click", function () {
+                            console.log("local var " + i)
+                            socket.emit('changeColor', (i + 1));
+                        });
+                    }
+                }
+                else {
+                    for (let i = 0; i < 20; i++) {
+                        let ids = "#b" + (i + 1);
+                        document.querySelector(ids).addEventListener("click", function () {
+                            console.log("local var " + i)
+                            let btmpos = (300 * offset) + 10 + "px"
+                            let zaxis = zoffset;
+                            let xaxis = xoffset;
+                            let yaxis = yoffset;
+                            zoffset = (zoffset + 0.05)
+                            if (zoffset == -1.80)
+                            {
+                                zoffset = -2.0;
+                            }
+                            offset = (1+ offset)
+                            let rightpos = "10px"
+                            let clr = "color:rgb(0, 255, 255)";
+                            if (player == 2) {
+                                clr = "color:rgb(255, 0, 255)";
+                                xaxis = -xoffset;
+                                rightpos = "6500px"
+                            }
+                            xoffset = (xoffset + 0.25)
+                            if (xoffset == 1.95)
+                            {
+                                xoffset = 0.20;
+                                yoffset = (yoffset + 0.3);
+                            }
+
+                            socket.emit('collectBall', { btn: (i + 1), bottom: btmpos, right: rightpos, x: xaxis, y: yaxis, z: zaxis, colr: clr });
+                        });
+                    /*for (let i = 0; i < 20; i++) {
+                        let ids = "#b" + (i + 1);
+                        document.querySelector(ids).addEventListener("click", function () {
+                            console.log("local var " + i)
+                            let btmpos = (300 * offset) + 10 + "px"
+                            offset = (offset + 1)
+                            let rightpos = "10px"
+                            if (player == 2) {
+                                rightpos = "6500px"
+                            }
+
+                            socket.emit('collectBall', { btn: (i + 1), bottom: btmpos, right: rightpos });
+                        });*/
+                    }
+                }
+
+                // Update the count down every 1 second
+                var nowT = new Date(Date.now()+30*1000).getTime()
+                document.getElementById("label1").innerHTML = "Timer :"
+                
+                var x = setInterval(function () {
+
+                    // Get today's date and time
+                    var now = new Date().getTime();
+
+                    // Find the distance between now and the count down date
+                    var distance = nowT - now;
+                    console.log(nowT);
+
+                    // Time calculations for days, hours, minutes and seconds
+                    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    // Display the result in the element with id="demo"
+                    document.getElementById("demo").innerHTML = seconds + "s ";
+
+                    // If the count down is finished, write some text
+                    if (distance < 0) {
+                        clearInterval(x);
+                        document.getElementById("demo").innerHTML = "EXPIRED";
+                        for (let i = 0; i < 20; i++) {
+                            let ids = "b" + (i + 1);
+                            btn = document.getElementById(ids);
+                            btn.disabled = true
+                        }
+                    }
+                }, 1000);
+            });
+        });
+
+    </script>
+
+</body>
+
+</html>
